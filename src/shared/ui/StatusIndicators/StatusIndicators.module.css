@@ -1,0 +1,36 @@
+.loading {
+  font-size: 12px;
+  opacity: 0.7;
+  padding: 12px 4px;
+  text-align: center;
+}
+.end {
+  font-size: 12px;
+  opacity: 0.55;
+  padding: 16px 4px;
+  text-align: center;
+}
+.empty {
+  padding: 32px 12px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.7;
+}
+.errorWrap {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 14px;
+}
+.errorBtn {
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.errorBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
