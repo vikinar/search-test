@@ -72,11 +72,24 @@ export function useLocalSearchQuery(opts: UseLocalSearchOptions = {}) {
       abortRef.current = ac;
       const rid = ++reqIdRef.current;
       try {
-        // small artificial delay to mimic network
-        await new Promise((r) => setTimeout(r, page === 1 ? 120 : 400));
+        // artificial delay now cancellable
+        const delayMs = page === 1 ? 120 : 400;
+        await new Promise<void>((resolve, reject) => {
+          const t = setTimeout(resolve, delayMs);
+          // abort listener
+          ac.signal.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(t);
+              reject(new DOMException("Aborted", "AbortError"));
+            },
+            { once: true }
+          );
+        });
+        if (ac.signal.aborted || rid !== reqIdRef.current) return; // aborted during delay
         const res = runSearch({ q, page, perPage, fuzzy });
+        if (ac.signal.aborted || rid !== reqIdRef.current) return; // double check before mutating state / cache
         cacheRef.current.set(key, { data: res, ts: Date.now() });
-        if (rid !== reqIdRef.current) return;
         setPages((prev) =>
           prev.some((p) => p.page === page)
             ? prev
@@ -84,8 +97,9 @@ export function useLocalSearchQuery(opts: UseLocalSearchOptions = {}) {
         );
       } catch (e) {
         const err = e as { name?: string; message?: string };
-        if (err?.name === "AbortError") return;
-        setError(err?.message || "Ошибка загрузки");
+        if (err?.name !== "AbortError") {
+          setError(err?.message || "Ошибка загрузки");
+        }
       } finally {
         if (rid === reqIdRef.current) setLoading(false);
       }
